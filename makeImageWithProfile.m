@@ -1,4 +1,4 @@
-function [out] = makeImageWithProfile(PARENT,IM,x,y,cutPoint)
+function [out] = makeImageWithProfile(PARENT,IM,x,y,cutPoint,name)
 % function prepares VBoxFlex element with 2D image and 
 % its cross section at selected point
 
@@ -6,7 +6,7 @@ theGrid = uiextras.VBoxFlex('Parent',PARENT,'Spacing',5);
 
 % make 2D image
 box1 = uiextras.BoxPanel('Parent',theGrid,...
-                         'Title', 'Lens',...
+                         'Title', name,...
                          'Padding',5);
 axImage = axes('Parent',box1,...
                'ActivePositionProperty',...
@@ -17,7 +17,7 @@ colormap gray
 
 % make cross section
 box2 = uiextras.BoxPanel('Parent',theGrid,...
-                         'Title', 'Lens cross section',...
+                         'Title', [name ' cross section'],...
                          'Padding',5);
 
 axPlot = axes('Parent',box2,...
@@ -29,7 +29,5 @@ plot(axPlot,x,IM(cutPoint,:));
 % must be set after creation of cildren
 set(theGrid, 'Sizes', [-5 -2] );
 
-
 out = theGrid;
-
 end
