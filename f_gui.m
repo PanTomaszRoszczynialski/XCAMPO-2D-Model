@@ -1,5 +1,5 @@
 %% GET DATA
-SIZE = 512;
+SIZE = 200;
 t = linspace(-1,1,SIZE);
 [X, Y] = meshgrid(t,t);
 gaus = exp(-X.^2 - Y.^2);
@@ -14,7 +14,7 @@ LENS = struct();
 LENS.diameter = 2.4e-3; % METERS
 LENS.line = linspace(-LENS.diameter/2,LENS.diameter/2,SIZE);
 [LENS.X, LENS.Y] = meshgrid(LENS.line,LENS.line);
-LENS.fun = @(X,Y)simpleLens2D(X,Y,LENS.diameter/2,SIZE);
+LENS.fun = @(X,Y)simpleLens2D(LENS.X,LENS.Y,LENS.diameter/2,SIZE);
 % LENS.shape = simpleLens2D(LENS.X,LENS.Y,LENS.diameter/2,SIZE);
 LENS.shape = LENS.fun(LENS.X,LENS.Y);
 %% GAUSS
@@ -25,7 +25,11 @@ GG = @(X,Y) 1/2/pi/THc^2 * exp(-0.5*(X.^2+Y.^2)/THc^2/Dist^2);
 DET.X = Magnif * LENS.X;
 DET.Y = Magnif * LENS.Y;
 %% CALCULATE eq9 WITHOUT OBJECT
-NoObjEq9 = intensity2D_eq9(LENS.shape,LENS.X,LENS.Y,DET.X,DET.Y,Magnif,GG);
+% NoObjEq9 = intensity2D_eq9(LENS.shape,LENS.X,LENS.Y,DET.X,DET.Y,Magnif,GG);
+% load above var
+load('200x200NOOBJEQ9TEST');
+%% SAMPLE BLURR | WRONG, shit
+BLURR = GG(LENS.X,LENS.Y);
 
 
 %% INIT FIGURE f
@@ -49,16 +53,16 @@ leftGrid = makeImageWithProfile(mainGrid,...
 
 %% FILL OBJECT SIDE (right)                            
 rightGrid = makeImageWithProfile(mainGrid,...
-                                 gaus,...
+                                 NoObjEq9,...
                                  X(1,:),X(1,:),...
                                  round(SIZE/2),...
-                                 'DUPA');
+                                 'EQ 9');
 %% FILL EQ9 NO OBJECT (test)
 thirdGrid = makeImageWithProfile(mainGrid,...
-                                 NoObjEq9,...
-                                 DET.X(1,:),DET.X(1,:),...
+                                 BLURR,...
+                                 LENS.line,LENS.line,...
                                  round(SIZE/2),...
-                                 'DUPA');
+                                 'Gaussian blur');
 
 %% SET TABS NAMES
 tabs.TabNames = {'Objects'};
