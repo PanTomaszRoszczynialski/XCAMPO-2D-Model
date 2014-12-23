@@ -1,14 +1,31 @@
 %% GET DATA
-SIZE = 1001;
+SIZE = 512;
 t = linspace(-1,1,SIZE);
 [X, Y] = meshgrid(t,t);
 gaus = exp(-X.^2 - Y.^2);
+
+%% SETUP PARAMETERS
+focal = 14e-3;
+Dist = 171e-3;
+Magnif = (focal - Dist)/focal;
+
 %% LENS
 LENS = struct();
 LENS.diameter = 2.4e-3; % METERS
 LENS.line = linspace(-LENS.diameter/2,LENS.diameter/2,SIZE);
 [LENS.X, LENS.Y] = meshgrid(LENS.line,LENS.line);
-LENS.shape = simpleLens2D(LENS.X,LENS.Y,LENS.diameter/2,SIZE);
+LENS.fun = @(X,Y)simpleLens2D(X,Y,LENS.diameter/2,SIZE);
+% LENS.shape = simpleLens2D(LENS.X,LENS.Y,LENS.diameter/2,SIZE);
+LENS.shape = LENS.fun(LENS.X,LENS.Y);
+%% GAUSS
+E = 30;
+THc = 30/E*1e-3;
+GG = @(X,Y) 1/2/pi/THc^2 * exp(-0.5*(X.^2+Y.^2)/THc^2/Dist^2);
+%% DETECTOR PLANE
+DET.X = Magnif * LENS.X;
+DET.Y = Magnif * LENS.Y;
+%% CALCULATE eq9 WITHOUT OBJECT
+NoObjEq9 = intensity2D_eq9(LENS.shape,LENS.X,LENS.Y,DET.X,DET.Y,Magnif,GG);
 
 
 %% INIT FIGURE f
@@ -27,41 +44,21 @@ leftGrid = makeImageWithProfile(mainGrid,...
                                 LENS.shape,...
                                 LENS.line,...
                                 LENS.line,...
-                                500,...
+                                round(SIZE/2),...
                                 'LENS');
 
 %% FILL OBJECT SIDE (right)                            
 rightGrid = makeImageWithProfile(mainGrid,...
                                  gaus,...
                                  X(1,:),X(1,:),...
-                                 500,...
-                                 'DUPA');                            
-
-if(true)
-    
-%     
-%     % BOX1 
-%     box11 = uiextras.BoxPanel('Parent',grid11,...
-%                               'Title', 'Lens',...
-%                               'Padding',5);
-%     axes1 = axes('Parent',box11,...
-%                  'ActivePositionProperty',...
-%                  'OuterPosition' );
-%     imagesc(X(1,:),X(1,:),gaus,'Parent',axes1);
-%     colormap gray
-%     % BOX2
-%     box12 = uiextras.BoxPanel('Parent',grid11,...
-%                               'Title', 'Lens Profile',...
-%                               'Padding',5);
-%     axes2 = axes('Parent',box12,...
-%                  'ActivePositionProperty',...
-%                  'OuterPosition' );
-%     plot(axes2,X(1,:),gaus(500,:));
-    
-    
-end
-
-
+                                 round(SIZE/2),...
+                                 'DUPA');
+%% FILL EQ9 NO OBJECT (test)
+thirdGrid = makeImageWithProfile(mainGrid,...
+                                 NoObjEq9,...
+                                 DET.X(1,:),DET.X(1,:),...
+                                 round(SIZE/2),...
+                                 'DUPA');
 
 %% SET TABS NAMES
 tabs.TabNames = {'Objects'};
