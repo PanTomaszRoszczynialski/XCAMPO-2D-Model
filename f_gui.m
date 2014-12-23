@@ -1,5 +1,5 @@
 %% GET DATA
-SIZE = 200;
+SIZE = 400;
 t = linspace(-1,1,SIZE);
 [X, Y] = meshgrid(t,t);
 gaus = exp(-X.^2 - Y.^2);
@@ -25,11 +25,12 @@ GG = @(X,Y) 1/2/pi/THc^2 * exp(-0.5*(X.^2+Y.^2)/THc^2/Dist^2);
 DET.X = Magnif * LENS.X;
 DET.Y = Magnif * LENS.Y;
 %% CALCULATE eq9 WITHOUT OBJECT
-% NoObjEq9 = intensity2D_eq9(LENS.shape,LENS.X,LENS.Y,DET.X,DET.Y,Magnif,GG);
+NoObjEq9 = intensity2D_eq9(LENS.shape,LENS.X,LENS.Y,DET.X,DET.Y,Magnif,GG);
+save('400x400NoObjectTestEq9.mat','NoObjEq9');
 % load above var
-load('200x200NOOBJEQ9TEST');
+% load('250x250NoObjectTestEq9.mat');
 %% SAMPLE BLURR | WRONG, shit
-BLURR = GG(LENS.X,LENS.Y);
+BLURR = GG(-Magnif*LENS.X,-Magnif*LENS.Y);
 
 
 %% INIT FIGURE f
@@ -60,7 +61,7 @@ rightGrid = makeImageWithProfile(mainGrid,...
 %% FILL EQ9 NO OBJECT (test)
 thirdGrid = makeImageWithProfile(mainGrid,...
                                  BLURR,...
-                                 LENS.line,LENS.line,...
+                                 DET.X(1,:),DET.Y(:,1),...
                                  round(SIZE/2),...
                                  'Gaussian blur');
 
